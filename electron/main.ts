@@ -13,135 +13,142 @@ declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string
 
 let isDev = false
 
-function createWindow () {
+function createWindow() {
   mainWindow = new BrowserWindow({
-    width: isDev? 1100 : 550,
+    width: isDev ? 1100 : 550,
     height: 850,
     backgroundColor: "#191622",
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY
+      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
     frame: false,
-    resizable: false
-  })
+    resizable: false,
+  });
 
   if (isDev) {
-    mainWindow.webContents.openDevTools()
+    mainWindow.webContents.openDevTools();
   }
 
-  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY)
+  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   mainWindow.on("closed", () => {
-    mainWindow = null
-  })
+    mainWindow = null;
+  });
 
-  // Send config file to React ( Work also on build )
-  mainWindow.webContents.on("did-finish-load", () => mainWindow?.webContents.send("Loaded", configFile) );
+  mainWindow.webContents.on("did-finish-load", () => {
+    mainWindow?.webContents.send("Loaded", configFile);
+  });
 }
 
-async function registerListeners () {
-  /**
-   * This comes from bridge integration, check bridge.ts
-   */
+function registerListeners() {
   ipcMain.on("message", (_, message, data, data2) => {
-    // Receive Message from React
-    if (message == "appQuit") {
-      // Quit App
-      app.quit()
-    } else if (message == "appMinimize") {
-      // Minimize App
-      mainWindow? mainWindow.minimize() : alert()
-    } else if ( message == "discord" ) {
-      // Open Discord in default web browser
-      shell.openExternal(data)
-    } else if ( message == "generate" ) {
-      // generate door audio file
-      saveFile(data)
-    } else if (message == "openFile") {
-      getFile()
-    } else {
-      // Receive unkown Message and Data from React
-      // console.log(message, JSON.stringify(data))
+    switch (message) {
+      case "appQuit":
+        app.quit();
+        break;
+      case "appMinimize":
+        mainWindow?.minimize();
+        break;
+      case "discord":
+        shell.openExternal(data);
+        break;
+      case "generate":
+        saveFile(data);
+        break;
+      case "openFile":
+        getFile();
+        break;
+      default:
+        console.warn("Unknown message received:", message);
+        break;
     }
-  })
+  });
 }
 
-app.on("ready", createWindow)
-  .whenReady()
+app.whenReady()
+  .then(createWindow)
   .then(registerListeners)
-  .catch(e => console.error(e))
+  .catch((e) => console.error(e));
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
-    app.quit()
+    app.quit();
   }
-})
+});
 
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow()
+    createWindow();
   }
-})
+});
 
-const doorXML = (data: []) => {
-  return data.reduce((result: string, item: { doorName: string; doorHash: string; soundSet: string; Params: string; value: number }) => {
-   return result + `\n    <Item type="Door" ntOffset="0">\n      <Name>d_${item.doorName}</Name>\n      <SoundSet>${item.soundSet}</SoundSet>\n      <Params>${item.Params}</Params>\n      <Unk1 value="${item.value}" />\n    </Item>`
-  }, "")
-}
 
-const doorModelXML = (data: []) => {
-  return data.reduce((result: string, item: { doorName: string; doorHash: string; soundName: string }) => {
-   return result + `\n    <Item type="DoorModel" ntOffset="0">\n      <Name>dasl_${item.doorHash}</Name>\n      <Door>d_${item.doorName}</Door>\n    </Item>`
-  }, "")
-}
+const doorXML = (data: any[]) =>
+  data.reduce((result, item) => {
+    return (
+      result +
+      `\n    <Item type="Door" ntOffset="0">\n      <Name>d_${item.doorName}</Name>\n      <SoundSet>${item.soundSet}</SoundSet>\n      <Params>${item.Params}</Params>\n      <Unk1 value="${item.value}" />\n    </Item>`
+    );
+  }, "");
 
-const nameTableXML = (data: []) => {
-  return data.reduce((result: string, item: { doorName: string }) => {
-   return result + `d_${item.doorName}\n`
-  }, "")
-}
+const doorModelXML = (data: any[]) =>
+  data.reduce((result, item) => {
+    return (
+      result +
+      `\n    <Item type="DoorModel" ntOffset="0">\n      <Name>dasl_${item.doorHash}</Name>\n      <Door>d_${item.doorName}</Door>\n    </Item>`
+    );
+  }, "");
 
-function saveFile(data: []) {
-  let fileSelectionPromise = dialog.showSaveDialog({defaultPath: "c:/door_test_game.dat151.rel.xml"});
-  fileSelectionPromise.then(function(obj) {
-    // console.log(JSON.stringify(obj, null, '\t'))
-    const filePath = String(obj.filePath)
-    let xml
-    xml = `<?xml version="1.0" encoding="UTF-8"?>\n<Dat151>\n  <Version value="9458585" />\n  <Items>${doorXML(data)}${doorModelXML(data)}\n  </Items>\n</Dat151>`
-    writeFile(filePath, xml, (err: boolean) => {
-      if (err) {
-        console.error(err)
-      }
-      let fileSelectionPromiseNameTable = dialog.showSaveDialog({defaultPath: "c:/door_test_game.dat151.nametable"});
-      fileSelectionPromiseNameTable.then(function(obj) {
-        const filePath = String(obj.filePath)
-        let nameTable: any
-        nameTable = `${nameTableXML(data)}`
-        writeFile(filePath, nameTable, (err: boolean) => {
-          if (err) {
-            console.error(err)
-          }
-        })
+
+const nameTableXML = (data: any[]) =>
+  data.reduce((result, item) => {
+    return result + `d_${item.doorName}\n`;
+  }, "");
+
+function saveFile(data: any[]) {
+  dialog
+    .showSaveDialog({ defaultPath: "c:/door_test_game.dat151.rel.xml" })
+    .then(({ filePath }) => {
+      if (!filePath) return;
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<Dat151>\n  <Version value="9458585" />\n  <Items>${doorXML(data)}${doorModelXML(data)}\n  </Items>\n</Dat151>`;
+      writeFile(filePath, xml, (err: any) => {
+        if (err) {
+          console.error(err);
+        } else {
+          dialog
+            .showSaveDialog({ defaultPath: "c:/door_test_game.dat151.nametable" })
+            .then(({ filePath: nameTablePath }) => {
+              if (!nameTablePath) return;
+              const nameTable = nameTableXML(data);
+              writeFile(nameTablePath, nameTable, (err: any) => {
+                if (err) {
+                  console.error(err);
+                }
+              });
+            });
+        }
       });
-    })
-  });
-
+    });
 }
 
-var fileData: any
 function getFile() {
-  let fileSelectionPromise = dialog.showOpenDialog({properties: ["openFile"]});
-  fileSelectionPromise.then(function(obj) {
-    const filePaths = String(obj.filePaths)
-    fileData = readFileSync(filePaths)
-    xmlToJSON(fileData).catch(err => console.error("ERR", err));
-  });
+  dialog
+    .showOpenDialog({ properties: ["openFile"] })
+    .then(({ filePaths }) => {
+      if (!filePaths || filePaths.length === 0) return;
+      const fileData = readFileSync(filePaths[0]);
+      xmlToJSON(fileData).catch((err) => console.error("Error parsing XML", err));
+    });
 }
 
-async function xmlToJSON(array: any) {
-   xml2js.parseString(array, function(err: any, result: any) {
-    mainWindow?.webContents.send("xmlData", result)
-  })
+async function xmlToJSON(data: any) {
+  xml2js.parseString(data, (err:any, result:any) => {
+    if (err) {
+      console.error("Error converting XML to JSON", err);
+      return;
+    }
+    mainWindow?.webContents.send("xmlData", result);
+  });
 }

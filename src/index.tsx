@@ -9,5 +9,6 @@ ReactDOM.render(
       <GlobalStyle />
       <Header />
       <Home />
-  </MantineProvider>
-, document.getElementById("root"));
+  </MantineProvider>,
+  document.getElementById("root")
+);

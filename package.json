@@ -1,6 +1,6 @@
 {
-  "name": "tiwabs-audio-door-tool",
-  "author": "Tiwabs",
+  "name": "tiwabsaudio-tool-rework-wolvezx",
+  "author": "Tiwabs edited by wolvezx",
   "version": "2.0.0",
   "description": "Generate audio file for customs door in GTA V.",
   "main": "./.webpack/main/index.js",
@@ -15,6 +15,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@electron/remote": "^2.1.2",
     "@emotion/react": "^11.10.5",
     "@mantine/core": "^5.9.5",
     "@mantine/dropzone": "^5.9.5",
@@ -28,12 +29,14 @@
     "@tiptap/extension-link": "^2.0.0-beta.209",
     "@tiptap/react": "^2.0.0-beta.209",
     "@tiptap/starter-kit": "^2.0.0-beta.209",
+    "node": "^20.15.0",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-hot-loader": "4.13.0",
     "react-icons": "^4.7.1",
     "styled-components": "5.3.0",
-    "xml2js": "^0.4.23"
+    "xml2js": "^0.6.2",
+    "yarn": "^1.22.22"
   },
   "devDependencies": {
     "@babel/core": "7.14.6",
@@ -44,7 +47,7 @@
     "@electron-forge/cli": "6.0.0-beta.57",
     "@electron-forge/maker-deb": "6.0.0-beta.57",
     "@electron-forge/maker-rpm": "6.0.0-beta.57",
-    "@electron-forge/maker-squirrel": "6.0.0-beta.57",
+    "@electron-forge/maker-squirrel": "^6.4.2",
     "@electron-forge/maker-zip": "6.0.0-beta.57",
     "@electron-forge/plugin-webpack": "6.0.0-beta.57",
     "@marshallofsound/webpack-asset-relocator-loader": "0.5.0",
@@ -59,7 +62,8 @@
     "@typescript-eslint/parser": "4.27.0",
     "babel-loader": "8.2.2",
     "cross-env": "7.0.3",
-    "electron": "13.1.2",
+    "electron": "^31.1.0",
+    "electron-packager": "^17.1.2",
     "eslint": "7.29.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-config-standard": "16.0.3",
@@ -70,17 +74,18 @@
     "eslint-plugin-react": "7.24.0",
     "eslint-plugin-standard": "5.0.0",
     "jest": "27.0.4",
+    "lite-server": "^2.6.1",
     "npm-run-all": "4.1.5",
     "prettier": "2.3.1",
     "ts-jest": "27.0.3",
-    "typescript": "4.3.4",
-    "wait-on": "5.3.0"
+    "typescript": "^4.3.4",
+    "wait-on": "^7.2.0"
   },
   "config": {
     "forge": {
       "packagerConfig": {
-        "name": "Tiwabs Audio Door Tool",
-        "executableName": "tiwabs-audio-door-tool",
+        "name": "WXMaps Door Audio Tool",
+        "executableName": "WXMaps Door Audio Tool",
         "icon": "assets/icon",
         "extraResource": [
           "assets",
@@ -132,5 +137,8 @@
         }
       ]
     }
+  },
+  "directories": {
+    "test": "tests"
   }
 }
